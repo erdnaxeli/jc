@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"os"
 
 	irc "github.com/fluffle/goirc/client"
 
@@ -28,7 +29,7 @@ type Transport struct {
 	connectionError chan error
 }
 
-func New(cfg map[string]interface{}) (jc.Transport, error) {
+func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
 	t := &Transport{
 		cfg:             cfg,
 		connectionError: make(chan error),
@@ -38,6 +39,8 @@ func New(cfg map[string]interface{}) (jc.Transport, error) {
 		BaseTransport: jc.BaseTransport{
 			Events: make(chan interface{}),
 			End:    make(chan bool),
+
+			Logger: log.New(os.Stdout, name+": ", log.LstdFlags),
 		},
 	}
 

@@ -9,6 +9,7 @@ import (
 )
 
 func (t *Transport) connected(ev *slack.ConnectedEvent) {
+	t.Logger.Printf("Connected event")
 	events := []*jc.JoinEvent{}
 
 	for name, id := range t.channelIDs {
@@ -18,7 +19,6 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 			return
 		}
 
-		fmt.Printf("%s: %d\n", name, len(channel.Members))
 		for _, id := range channel.Members {
 			user, err := t.api.GetUserInfo(id)
 			if err != nil {
@@ -47,6 +47,7 @@ func (t *Transport) invalidAuth(ev *slack.InvalidAuthEvent) {
 }
 
 func (t *Transport) message(ev *slack.MessageEvent) {
+	t.Logger.Printf("Message event")
 	channel, ok := t.channelNames[ev.Channel]
 	if !ok {
 		// probably we got invited on a channel after starting the bot

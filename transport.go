@@ -1,5 +1,9 @@
 package jc
 
+import (
+	"log"
+)
+
 type Transport interface {
 	Run() (err error)
 
@@ -17,6 +21,8 @@ type Transport interface {
 type BaseTransport struct {
 	Events chan interface{}
 	End    chan bool
+
+	Logger *log.Logger
 }
 
 func (t *BaseTransport) GetEvents() chan interface{} {

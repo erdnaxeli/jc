@@ -1,6 +1,9 @@
 package slack
 
 import (
+	"log"
+	"os"
+
 	"github.com/nlopes/slack"
 
 	"git.iiens.net/morignot2011/jc"
@@ -17,7 +20,7 @@ type Transport struct {
 	userNames       map[string]string
 }
 
-func New(cfg map[string]interface{}) (jc.Transport, error) {
+func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
 	token, ok := cfg["token"]
 	if !ok {
 		return nil, jc.ConfigError{"token"}
@@ -36,6 +39,8 @@ func New(cfg map[string]interface{}) (jc.Transport, error) {
 		BaseTransport: jc.BaseTransport{
 			Events: make(chan interface{}),
 			End:    make(chan bool),
+
+			Logger: log.New(os.Stdout, name+": ", log.LstdFlags),
 		},
 	}
 
