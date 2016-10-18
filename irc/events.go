@@ -14,7 +14,7 @@ import (
 func (t *Transport) connected(client *irc.Conn, line *irc.Line) {
 	if t.client != client {
 		// user's client
-		for _, channel := range t.channels {
+		for _, channel := range t.userChannels[client.Me().Nick] {
 			log.Printf("join %s", channel)
 			client.Join(channel)
 		}
@@ -41,7 +41,7 @@ func (t *Transport) connected(client *irc.Conn, line *irc.Line) {
 func (t *Transport) disconnected(client *irc.Conn, line *irc.Line) {
 	if t.client != client {
 		// all should already have been cleaned
-		log.Print("%s got disconnected", client.Me())
+		log.Print("%s got disconnected", client.Me().Nick)
 		return
 	}
 
