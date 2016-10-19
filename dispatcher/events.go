@@ -9,44 +9,72 @@ import (
 func (d *Dispatcher) join(transport string, ev *jc.JoinEvent) {
 	log.Printf("Receive JoinEvent from %s: %s on %s", transport, ev.Nick, ev.Channel)
 
-	links := d.findLink(transport, ev.Channel)
-	for _, link := range links {
-		if isFiltered(link.filters, ev.Nick) {
-			continue
-		}
-
-		for _, endpoint := range link.endpoints {
-			if endpoint.transport == transport && endpoint.channel == ev.Channel {
-				continue
-			}
-
-			d.transports[endpoint.transport].Join(&jc.JoinEvent{
-				Nick:    ev.Nick + "_jc",
-				Channel: endpoint.channel,
-			})
-		}
+	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].Join(&jc.JoinEvent{
+			Nick:    ev.Nick,
+			Channel: endpoint.channel,
+		})
 	}
 }
 
 func (d *Dispatcher) message(transport string, ev *jc.MessageEvent) {
 	log.Printf("Receive MessageEvent from %s: %s on %s", transport, ev.Nick, ev.Channel)
 
-	links := d.findLink(transport, ev.Channel)
-	for _, link := range links {
-		if isFiltered(link.filters, ev.Nick) {
-			continue
-		}
+	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].Message(&jc.MessageEvent{
+			Nick:    ev.Nick,
+			Channel: endpoint.channel,
+			Text:    ev.Text,
+		})
+	}
+}
 
-		for _, endpoint := range link.endpoints {
-			if endpoint.transport == transport && endpoint.channel == ev.Channel {
-				continue
-			}
+func (d *Dispatcher) nick(transport string, ev *jc.NickEvent) {
+	log.Printf("Receive NickEvent from %s : %s to %s", transport, ev.OldNick, ev.NewNick)
 
-			d.transports[endpoint.transport].Message(&jc.MessageEvent{
-				Nick:    ev.Nick + "_jc",
-				Channel: endpoint.channel,
-				Text:    ev.Text,
-			})
-		}
+	endpoints := d.findTransports(transport, ev.OldNick)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].Nick(&jc.NickEvent{
+			OldNick: ev.OldNick,
+			NewNick: ev.NewNick,
+		})
+	}
+}
+
+func (d *Dispatcher) privMessage(transport string, ev *jc.PrivMessageEvent) {
+	log.Printf("Receive PrivMessageEvent from %s: %s on %s", transport, ev.Nick, ev.Channel)
+
+	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].PrivMessage(&jc.PrivMessageEvent{
+			Nick:    ev.Nick,
+			Channel: endpoint.channel,
+			Text:    ev.Text,
+		})
+	}
+}
+
+func (d *Dispatcher) part(transport string, ev *jc.PartEvent) {
+	log.Printf("Receive PartEvent from %s: %s on %s", transport, ev.Nick, ev.Channel)
+
+	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].Part(&jc.PartEvent{
+			Nick:    ev.Nick,
+			Channel: endpoint.channel,
+		})
+	}
+}
+
+func (d *Dispatcher) quit(transport string, ev *jc.QuitEvent) {
+	log.Printf("Receive QuitEvent from %s: %s", transport, ev.Nick)
+
+	endpoints := d.findTransports(transport, ev.Nick)
+	for _, endpoint := range endpoints {
+		d.transports[endpoint.transport].Quit(&jc.QuitEvent{
+			Nick: ev.Nick,
+		})
 	}
 }

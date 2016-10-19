@@ -118,7 +118,7 @@ func (t *Transport) newNick(nick string) string {
 		delete(t.realNicks, nick)
 	}
 
-	newNick := nick + "_"
+	newNick := nick + "^"
 	t.realNicks[newNick] = realNick
 	return newNick
 }

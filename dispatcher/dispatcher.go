@@ -79,6 +79,14 @@ func (d *Dispatcher) Run() {
 			d.join(name, ev)
 		case *jc.MessageEvent:
 			d.message(name, ev)
+		case *jc.NickEvent:
+			d.nick(name, ev)
+		case *jc.PrivMessageEvent:
+			d.privMessage(name, ev)
+		case *jc.PartEvent:
+			d.part(name, ev)
+		case *jc.QuitEvent:
+			d.quit(name, ev)
 		}
 	}
 }
@@ -113,6 +121,38 @@ func (d *Dispatcher) findLink(transport string, channels ...string) []Link {
 	}
 
 	return links
+}
+
+func (d *Dispatcher) findTransports(transport string, nick string, channels ...string) []Endpoint {
+	var endpoints []Endpoint
+	var links []Link
+	var channel string
+
+	if len(channels) == 0 {
+		channel = ""
+		links = d.findLink(transport)
+	} else {
+		channel = channels[0]
+		links = d.findLink(transport, channel)
+	}
+
+	for _, link := range links {
+		if isFiltered(link.filters, nick) {
+			continue
+		}
+
+		for _, endpoint := range link.endpoints {
+			if channel == "" && endpoint.transport == transport {
+				continue
+			} else if channel != "" && endpoint.transport == transport && endpoint.channel == channel {
+				continue
+			}
+
+			endpoints = append(endpoints, endpoint)
+		}
+	}
+
+	return endpoints
 }
 
 func isFiltered(filters []string, nick string) bool {
