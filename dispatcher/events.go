@@ -12,7 +12,7 @@ func (d *Dispatcher) join(transport string, ev *jc.JoinEvent) {
 	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
 	for _, endpoint := range endpoints {
 		d.transports[endpoint.transport].Join(&jc.JoinEvent{
-			Nick:    ev.Nick,
+			Nick:    ev.Nick + "_jc",
 			Channel: endpoint.channel,
 		})
 	}
@@ -24,7 +24,7 @@ func (d *Dispatcher) message(transport string, ev *jc.MessageEvent) {
 	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
 	for _, endpoint := range endpoints {
 		d.transports[endpoint.transport].Message(&jc.MessageEvent{
-			Nick:    ev.Nick,
+			Nick:    ev.Nick + "_jc",
 			Channel: endpoint.channel,
 			Text:    ev.Text,
 		})
@@ -49,7 +49,7 @@ func (d *Dispatcher) privMessage(transport string, ev *jc.PrivMessageEvent) {
 	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
 	for _, endpoint := range endpoints {
 		d.transports[endpoint.transport].PrivMessage(&jc.PrivMessageEvent{
-			Nick:    ev.Nick,
+			Nick:    ev.Nick + "_jc",
 			Channel: endpoint.channel,
 			Text:    ev.Text,
 		})
@@ -62,7 +62,7 @@ func (d *Dispatcher) part(transport string, ev *jc.PartEvent) {
 	endpoints := d.findTransports(transport, ev.Nick, ev.Channel)
 	for _, endpoint := range endpoints {
 		d.transports[endpoint.transport].Part(&jc.PartEvent{
-			Nick:    ev.Nick,
+			Nick:    ev.Nick + "_jc",
 			Channel: endpoint.channel,
 		})
 	}
@@ -74,7 +74,7 @@ func (d *Dispatcher) quit(transport string, ev *jc.QuitEvent) {
 	endpoints := d.findTransports(transport, ev.Nick)
 	for _, endpoint := range endpoints {
 		d.transports[endpoint.transport].Quit(&jc.QuitEvent{
-			Nick: ev.Nick,
+			Nick: ev.Nick + "_jc",
 		})
 	}
 }
