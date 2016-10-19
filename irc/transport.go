@@ -33,6 +33,7 @@ func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
 	t := &Transport{
 		cfg:             cfg,
 		connectionError: make(chan error),
+		realNicks:       make(map[string]string),
 		userClients:     make(map[string]*irc.Conn),
 		userChannels:    make(map[string][]string),
 
@@ -110,7 +111,6 @@ func (t *Transport) newIrcConfig(nick string, cfg map[string]interface{}) (*irc.
 }
 
 func (t *Transport) newNick(nick string) string {
-	log.Printf("new nick %s", nick)
 	realNick, ok := t.realNicks[nick]
 	if !ok {
 		realNick = nick
@@ -118,7 +118,7 @@ func (t *Transport) newNick(nick string) string {
 		delete(t.realNicks, nick)
 	}
 
-	newNick := nick + "^"
+	newNick := nick + "_"
 	t.realNicks[newNick] = realNick
 	return newNick
 }
@@ -138,11 +138,22 @@ func (t *Transport) getIrcClient(cfg *irc.Config) *irc.Conn {
 }
 
 func (t *Transport) isUserDistant(user string) bool {
-	for k, _ := range t.userClients {
+	for k, _ := range t.realNicks {
 		if k == user {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (t *Transport) getNick(client *irc.Conn) string {
+	ircNick := client.Me().Nick
+	nick, ok := t.realNicks[ircNick]
+
+	if ok {
+		return nick
+	} else {
+		return ircNick
+	}
 }

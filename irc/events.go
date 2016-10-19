@@ -12,10 +12,12 @@ import (
 )
 
 func (t *Transport) connected(client *irc.Conn, line *irc.Line) {
-	t.Logger.Printf("%s is connected", client.Me().Nick)
+	nick := t.getNick(client)
+	t.Logger.Printf("%s is connected", nick)
+
 	if t.client != client {
 		// user's client
-		for _, channel := range t.userChannels[client.Me().Nick] {
+		for _, channel := range t.userChannels[nick] {
 			log.Printf("Join %s", channel)
 			client.Join(channel)
 		}
