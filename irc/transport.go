@@ -137,9 +137,11 @@ func (t *Transport) getIrcClient(cfg *irc.Config) *irc.Conn {
 	return client
 }
 
-func (t *Transport) isUserDistant(user string) bool {
-	for k, _ := range t.realNicks {
-		if k == user {
+func (t *Transport) isUserDistant(ircNick string) bool {
+	nick := t.getRealNick(ircNick)
+
+	for k, _ := range t.userClients {
+		if k == nick {
 			return true
 		}
 	}
@@ -149,6 +151,10 @@ func (t *Transport) isUserDistant(user string) bool {
 
 func (t *Transport) getNick(client *irc.Conn) string {
 	ircNick := client.Me().Nick
+	return t.getRealNick(ircNick)
+}
+
+func (t *Transport) getRealNick(ircNick string) string {
 	nick, ok := t.realNicks[ircNick]
 
 	if ok {
