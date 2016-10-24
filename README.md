@@ -39,3 +39,11 @@ links:
         - to
         - ignore
 ```
+
+## Build
+
+```
+go get git.iiens.net/morignot2011/jc/cmd/jc
+cd $GOPATH/src/git.iiens.net/morignot2011/jc/cmd/jc
+go build
+```
