@@ -15,14 +15,14 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 	for name, id := range t.channelIDs {
 		channel, err := t.api.GetChannelInfo(id)
 		if err != nil {
-			t.connectionError <- err
+			t.Logger.Print(err)
 			return
 		}
 
 		for _, id := range channel.Members {
 			user, err := t.api.GetUserInfo(id)
 			if err != nil {
-				t.connectionError <- err
+				t.Logger.Printf(err)
 				return
 			}
 			t.userNames[id] = user.Name
@@ -34,8 +34,6 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 		}
 	}
 
-	close(t.connectionError)
-
 	fmt.Printf("joins: %d\n", len(events))
 	for _, event := range events {
 		t.Events <- event
@@ -43,7 +41,6 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 }
 
 func (t *Transport) invalidAuth(ev *slack.InvalidAuthEvent) {
-	t.connectionError <- fmt.Errorf("Invalid auth")
 }
 
 func (t *Transport) message(ev *slack.MessageEvent) {

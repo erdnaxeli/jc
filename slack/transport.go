@@ -12,12 +12,11 @@ import (
 type Transport struct {
 	jc.BaseTransport
 
-	api             *slack.Client
-	rtm             *slack.RTM
-	channelIDs      map[string]string
-	channelNames    map[string]string
-	connectionError chan error
-	userNames       map[string]string
+	api          *slack.Client
+	rtm          *slack.RTM
+	channelIDs   map[string]string
+	channelNames map[string]string
+	userNames    map[string]string
 }
 
 func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
@@ -29,12 +28,11 @@ func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
 	api := slack.New(token.(string))
 	rtm := api.NewRTM()
 	t := &Transport{
-		api:             api,
-		rtm:             rtm,
-		channelIDs:      make(map[string]string),
-		channelNames:    make(map[string]string),
-		connectionError: make(chan error),
-		userNames:       make(map[string]string),
+		api:          api,
+		rtm:          rtm,
+		channelIDs:   make(map[string]string),
+		channelNames: make(map[string]string),
+		userNames:    make(map[string]string),
 
 		BaseTransport: jc.BaseTransport{
 			Events: make(chan interface{}),
@@ -64,10 +62,6 @@ func New(name string, cfg map[string]interface{}) (jc.Transport, error) {
 func (t *Transport) Run() error {
 	go t.rtm.ManageConnection()
 	go t.dispatchEvents()
-
-	if err, ok := <-t.connectionError; ok {
-		return jc.ConnectionError{err}
-	}
 
 	return nil
 }
