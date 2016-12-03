@@ -22,7 +22,7 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 		for _, id := range channel.Members {
 			user, err := t.api.GetUserInfo(id)
 			if err != nil {
-				t.Logger.Printf(err)
+				t.Logger.Print(err)
 				return
 			}
 			t.userNames[id] = user.Name
@@ -40,7 +40,20 @@ func (t *Transport) connected(ev *slack.ConnectedEvent) {
 	}
 }
 
+func (t *Transport) disconnected(ev *slack.DisconnectedEvent) {
+	if ev.Intentional {
+		return
+	}
+
+	t.Logger.Printf("Disconnected")
+}
+
 func (t *Transport) invalidAuth(ev *slack.InvalidAuthEvent) {
+	for _, nick := range t.userNames {
+		t.Events <- &jc.QuitEvent{
+			Nick: nick,
+		}
+	}
 }
 
 func (t *Transport) message(ev *slack.MessageEvent) {
