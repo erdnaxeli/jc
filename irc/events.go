@@ -43,8 +43,17 @@ func (t *Transport) connected(client *irc.Conn, line *irc.Line) {
 
 func (t *Transport) disconnected(client *irc.Conn, line *irc.Line) {
 	if t.client != client {
-		// all should already have been cleaned
-		log.Printf("%s got disconnected", client.Me().Nick)
+		nick := t.getNick(client)
+		delete(t.userClients, nick)
+		delete(t.realNicks, client.Me().Nick)
+
+		log.Printf("%s got disconnected, reconnecting", client.Me().Nick)
+
+		t.Join(&jc.JoinEvent{
+			Nick:    nick,
+			Channel: t.userChannels[nick][0],
+		})
+		log.Printf("%s got disconnected, reconnecting", client.Me().Nick)
 		return
 	}
 
